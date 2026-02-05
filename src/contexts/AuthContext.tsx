@@ -13,7 +13,6 @@ import {
   persistSession,
   clearSession,
   getStoredSession,
-  toUserId,
 } from '../lib/matrixAuth'
 
 type AuthState = {
@@ -24,7 +23,8 @@ type AuthState = {
 }
 
 type AuthContextValue = AuthState & {
-  login: (username: string, password: string) => Promise<void>
+  /** Exchange SSO login_token (from redirect) for a session */
+  loginWithSsoToken: (loginToken: string) => Promise<void>
   logout: () => Promise<void>
   clearError: () => void
 }
@@ -39,13 +39,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const clearError = useCallback(() => setError(null), [])
 
-  const login = useCallback(async (username: string, password: string) => {
+  const loginWithSsoToken = useCallback(async (loginToken: string) => {
     setError(null)
     setLoading(true)
     try {
       const loginClient = createLoginClient()
-      const userIdFull = toUserId(username)
-      const res = await loginClient.loginWithPassword(userIdFull, password)
+      const res = await loginClient.loginWithToken(loginToken)
       persistSession(res.access_token, res.user_id, res.device_id)
       const authed = createAuthenticatedClient({
         accessToken: res.access_token,
@@ -60,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           ? String((e.data as { error: unknown }).error)
           : e instanceof Error
             ? e.message
-            : 'Login failed'
+            : 'SSO login failed'
       setError(message)
       throw e
     } finally {
@@ -81,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearSession()
   }, [client])
 
+  // Restore session from storage on load
   useEffect(() => {
     const stored = getStoredSession()
     if (!stored) {
@@ -93,12 +93,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setLoading(false)
   }, [])
 
+  // Handle SSO callback: redirect returns with ?loginToken=... or #loginToken=...
+  useEffect(() => {
+    const params = new URLSearchParams(
+      typeof window !== 'undefined' && window.location.hash
+        ? window.location.hash.slice(1)
+        : typeof window !== 'undefined'
+          ? window.location.search
+          : ''
+    )
+    const loginToken = params.get('loginToken')
+    if (!loginToken) return
+    // Remove token from URL without reload
+    if (typeof window !== 'undefined') {
+      const clean = window.location.pathname + (window.location.search || '').replace(/\bloginToken=[^&]*&?/g, '').replace(/\?$/, '')
+      const hash = (window.location.hash || '').replace(/loginToken=[^&]*&?/g, '').replace(/^#&?|&$/g, '')
+      window.history.replaceState(null, '', clean + (hash ? '#' + hash : ''))
+    }
+    loginWithSsoToken(loginToken)
+  }, [loginWithSsoToken])
+
   const value: AuthContextValue = {
     client,
     userId,
     loading,
     error,
-    login,
+    loginWithSsoToken,
     logout,
     clearError,
   }
