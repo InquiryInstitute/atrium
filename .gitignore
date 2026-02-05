@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+
+# IDE
+.idea/
+*.xcuserstate
+*.xcworkspacedata
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Capacitor / native (keep ios/ and android/ in git; ignore local overrides)
+# ios/App/App/public is synced from dist
