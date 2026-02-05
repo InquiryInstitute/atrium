@@ -1,0 +1,29 @@
+.chat-audio-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.chat-audio-toggle__status {
+  font-size: 0.8rem;
+  color: var(--color-muted, #666);
+}
+
+.chat-audio-toggle__label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.chat-audio-toggle__label input {
+  width: auto;
+}
+
+@media (prefers-color-scheme: dark) {
+  .chat-audio-toggle__status {
+    color: #999;
+  }
+}

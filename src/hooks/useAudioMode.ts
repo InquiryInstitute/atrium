@@ -5,7 +5,7 @@ import { useState, useCallback, useEffect } from 'react'
  * Web: Web Speech API. iOS/Android: native via Capacitor (future).
  */
 export function useAudioMode() {
-  const [audioMode, setAudioModeState] = useState(false)
+  const [audioMode, setAudioModeState] = useState(true)
   const [sttSupported, setSttSupported] = useState(false)
   const [ttsSupported, setTtsSupported] = useState(false)
 

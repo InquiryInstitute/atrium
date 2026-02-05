@@ -1,10 +1,39 @@
-import { useState } from 'react'
-import { useAudioMode } from './hooks/useAudioMode'
+import { AudioModeProvider } from './contexts/AudioModeContext'
+import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { ChatAudioToggle } from './components/ChatAudioToggle'
+import { LoginForm } from './components/LoginForm'
 import './App.css'
 
-function App() {
-  const [homeserver, setHomeserver] = useState('https://matrix.org')
-  const { sttSupported, ttsSupported, audioMode, setAudioMode } = useAudioMode()
+function AppContent() {
+  const { userId, loading, logout } = useAuth()
+
+  if (loading) {
+    return (
+      <div className="app">
+        <header className="app-header">
+          <h1>Atrium</h1>
+          <p className="tagline">Matrix chat · Spaces · Web, iOS, Android</p>
+        </header>
+        <main className="app-main">
+          <p className="app-loading">Loading…</p>
+        </main>
+      </div>
+    )
+  }
+
+  if (!userId) {
+    return (
+      <div className="app">
+        <header className="app-header">
+          <h1>Atrium</h1>
+          <p className="tagline">Matrix chat · Spaces · Web, iOS, Android</p>
+        </header>
+        <main className="app-main">
+          <LoginForm />
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div className="app">
@@ -12,40 +41,32 @@ function App() {
         <h1>Atrium</h1>
         <p className="tagline">Matrix chat · Spaces · Web, iOS, Android</p>
       </header>
-
       <main className="app-main">
-        <section className="card">
-          <h2>Sign in</h2>
-          <p>Homeserver and login UI coming next.</p>
-          <label>
-            Homeserver
-            <input
-              type="url"
-              value={homeserver}
-              onChange={(e) => setHomeserver(e.target.value)}
-              placeholder="https://matrix.org"
-            />
-          </label>
+        <section className="card card--session">
+          <p className="session-line">
+            <span>Logged in as <strong>{userId}</strong></span>
+            <button type="button" className="session-logout" onClick={() => logout()}>
+              Sign out
+            </button>
+          </p>
         </section>
-
-        <section className="card">
-          <h2>Audio mode</h2>
-          <p>STT (speech-to-text) and TTS (text-to-speech) for hands-free use.</p>
-          <div className="audio-status">
-            <span>STT: {sttSupported ? '✓' : '—'}</span>
-            <span>TTS: {ttsSupported ? '✓' : '—'}</span>
-          </div>
-          <label className="toggle">
-            <input
-              type="checkbox"
-              checked={audioMode}
-              onChange={(e) => setAudioMode(e.target.checked)}
-            />
-            <span>Audio mode on</span>
-          </label>
+        <section className="card card--chat">
+          <h2>Chat</h2>
+          <p>Room list and messages will appear here. Audio mode is on by default; you can turn it off below.</p>
+          <ChatAudioToggle />
         </section>
       </main>
     </div>
+  )
+}
+
+function App() {
+  return (
+    <AuthProvider>
+      <AudioModeProvider>
+        <AppContent />
+      </AudioModeProvider>
+    </AuthProvider>
   )
 }
 

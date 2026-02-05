@@ -74,6 +74,34 @@
   width: auto;
 }
 
+.app-loading {
+  color: var(--color-muted, #555);
+  margin: 0;
+}
+
+.card--session .session-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.session-logout {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.9rem;
+  border: 1px solid var(--card-border, #e0e0e0);
+  border-radius: 0.35rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.session-logout:hover {
+  background: var(--card-bg, #eee);
+}
+
 @media (prefers-color-scheme: dark) {
   .card {
     --card-bg: #2a2a2a;
@@ -82,5 +110,8 @@
   .tagline,
   .card p {
     --color-muted: #999;
+  }
+  .app-loading {
+    color: #999;
   }
 }
